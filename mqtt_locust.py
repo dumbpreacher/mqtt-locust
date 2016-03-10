@@ -62,6 +62,7 @@ class MQTTClient(mqtt.Client):
         self.on_connect = self._on_connect
         self.pubmmap = {}
         self.submmap = {}
+        self.defaultQoS = 0
 
     def tls_set(self, ca_certs, certfile=None, keyfile=None, cert_reqs=ssl.CERT_REQUIRED, 
             tls_version=ssl.PROTOCOL_TLSv1_2, ciphers=None):
@@ -92,7 +93,6 @@ class MQTTClient(mqtt.Client):
                     **kwargs
                 )
           if err:
-            #raise ValueError(err)
             fire_locust_failure(
                     request_type=REQUEST_TYPE,
                     name=name,
@@ -100,9 +100,11 @@ class MQTTClient(mqtt.Client):
                     exception=ValueError(err)
                 )
 
+          #print ("publish: err,mid:["+str(err)+","+str(mid)+"]")
           self.pubmmap[mid] = Message(
                     MESSAGE_TYPE_PUB, qos, topic, payload, start_time, timeout, name
-                    )                        
+                    )
+          #print ("publish: Saved message - mqtt client obj id:["+str(id(self))+"] - pubmmap obj id:["+str(id(self.pubmmap))+"] in dict - mid:["+str(mid)+"] - message object id:["+str(id(self.pubmmap[mid]))+"]")                        
         except Exception as e:
           fire_locust_failure(
                     request_type=REQUEST_TYPE,
@@ -161,26 +163,39 @@ class MQTTClient(mqtt.Client):
         
     def _on_publish(self, client, userdata, mid):
         end_time = time.time()
-        message = self.pubmmap.pop(mid, None)
+        
+        if self.defaultQoS == 0:
+          #if QoS=0, we reach the callback before the publish() has enough time to update the pubmmap dictionary
+          time.sleep(float(0.5))
+
+        message = self.pubmmap.pop(mid, None)        
+        #print ("on_publish  - mqtt client obj id:["+str(id(self))+"] - pubmmap obj id:["+str(id(self.pubmmap))+"] - mid:["+str(mid)+"] - message obj id:["+str(id(message))+"]")
         if message is None:
-            return
+          fire_locust_failure(
+                request_type=REQUEST_TYPE,
+                name="message_found",
+                response_time=0,
+                exception=ValueError("Published message could not be found"),
+          )
+          return
+        
         total_time = time_delta(message.start_time, end_time)
         if message.timed_out(total_time):
-            fire_locust_failure(
+          fire_locust_failure(
                 request_type=REQUEST_TYPE,
                 name=message.name,
                 response_time=total_time,
                 exception=TimeoutError("publish timed out"),
-            )
-            #print("report publish failure - response_time:["+str(total_time)+"]")
+          )
+          #print("report publish failure - response_time:["+str(total_time)+"]")
         else:
-            fire_locust_success(
-                request_type=REQUEST_TYPE,
-                name=message.name,
-                response_time=total_time,
-                response_length=len(message.payload),
+          fire_locust_success(
+            request_type=REQUEST_TYPE,
+            name=message.name,
+            response_time=total_time,
+            response_length=len(message.payload),
             )
-            #print("report publish success - response_time:["+str(total_time)+"]")
+          #print("report publish success - response_time:["+str(total_time)+"]")
 
 
     def _on_subscribe(self, client, userdata, mid, granted_qos):
