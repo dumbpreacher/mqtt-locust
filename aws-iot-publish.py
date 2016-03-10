@@ -3,31 +3,27 @@ import random
 import resource
 import ssl
 import time
+import os
 
 from locust import TaskSet, task
 
 from mqtt_locust import MQTTLocust
 
-#this value is the number of seconds to be used to retry operations (valid for QoS >1)
+#this value is the number of seconds to be used before retrying operations (valid for QoS >1)
 RETRY = 5
 
 #ms
 PUBLISH_TIMEOUT = 10000
 SUBSCRIBE_TIMEOUT = 10000
 
-# _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
-# Config section
-CA_CERTS = "../certs/VeriSign-Class%203-Public-Primary-Certification-Authority-G5.pem"
-CERTFILE = "../certs/thing-cert.pem"
-KEYFILE = "../certs/thing-private-key.pem"
-TOPIC = 'locust/thing/temperature'
-# _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
-
 
 class ThingBehavior(TaskSet):
     @task
     def pubqos0(self):
-        self.client.publish(topic=TOPIC, payload=self.payload(), qos=0, name='publish:qos0:'+TOPIC, timeout=PUBLISH_TIMEOUT)
+        topic = os.getenv('MQTT_TOPIC','')
+        if topic == '':
+          raise ValueError("Please set environment variable MQTT_TOPIC")
+        self.client.publish(topic, payload=self.payload(), qos=0, name='publish:qos0:'+topic, timeout=PUBLISH_TIMEOUT)
 
     def on_start(self):
         #allow for the connection to be established before doing anything (publishing or subscribing) to the MQTT topic
@@ -46,9 +42,11 @@ class ThingBehavior(TaskSet):
    that we define in the GUI. Each instance of MyThing represents a device that will connect to AWS IoT.
 """
 class MyThing(MQTTLocust):
-    ca_certs = CA_CERTS
-    certfile = CERTFILE
-    keyfile = KEYFILE
+    ca_cert = os.getenv('CA_CERT','')
+    iot_cert = os.getenv('IOT_CERT','')
+    iot_private_key = os.getenv('IOT_PRIVATE_KEY','')
+    if ca_cert == '' or iot_cert == '' or iot_private_key == '': 
+      raise ValueError("Make sure the following environment variables are set: CA_CERT, IOT_CERT, IOT_PRIVATE_KEY")
     task_set = ThingBehavior
     min_wait = 1000
     max_wait = 1500

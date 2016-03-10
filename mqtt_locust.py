@@ -237,7 +237,7 @@ class MQTTLocust(Locust):
             host, port = self.host, 8883
 
         try:
-          self.client.tls_set(self.ca_certs, self.certfile, self.keyfile, tls_version=ssl.PROTOCOL_TLSv1_2)
+          self.client.tls_set(self.ca_cert, self.iot_cert, self.iot_private_key, tls_version=ssl.PROTOCOL_TLSv1_2)
           #It is important to do an asynchronous connect, given that we will have
           #multiple connections happening in a single server during a Locust test
           self.client.connect_async(host, port)

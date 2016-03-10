@@ -8,7 +8,7 @@ This repo is based on code found originally <a href="https://github.com/ajm188/m
 
 * Highly recommended to use virtualenv when installing and running this test.
 * Python 2.7.9 or later. The code in this repo requires support for TLSv1.2, which is available starting in Python 2.7.9
-* The code in this repodoes NOT work with Python 3 due to Locust not supporting Python 3.
+* The code in this repo does NOT work with Python 3 due to Locust not supporting Python 3.
 * GCC (GNU Compiler Collection), required by Locust: ```sudo yum install gcc```
 * Locust: ```pip install locustio```
 * OpenSSL v1.0.1 or greater (also due to TLSv1.2)
@@ -18,7 +18,7 @@ This repo is based on code found originally <a href="https://github.com/ajm188/m
 ### mqtt_locust.py
 
 This file contains logic to create an MQTT client, initiate a connection, publish messages
-to a topic it and subscribe to a topic. It also reports failure or success results to Locust.
+to a topic and subscribe to a topic. It also reports failure or success results to Locust.
 
 At the time, it only supports QoS=0, which is what is needed for connecting to the AWS IoT
 service.
@@ -35,11 +35,11 @@ is a random value between 0 and 10, which represents a temperature reading.
 
 ### Certificates
 Follow the instructions in the <a href="http://docs.aws.amazon.com/iot/latest/developerguide/secure-communication.html" target="new">AWS IoT documentation</a> in order 
-to create certificate files. Update the constants CA_CERTS, CERTFILE and KEYFILE in ```aws-iot-publish.py``` with
-the location of your certificate files
+to create certificate files. Follow the instructions <a href="http://docs.aws.amazon.com/iot/latest/developerguide/verify-pub-sub.html" target="new">here</a> to create a CA certificate. 
+Set environment variables CA_CERT, IOT_CERT and IOT_PRIVATE_KEY with the full location of your .pem files
 
 ### Topics
-Update the constant TOPIC in ```aws-iot-publish.py``` with the topic you want to publish messages to.
+Set the environment variable ```MQTT_TOPIC``` with the topic you want to publish messages to.
 
 
 ### Running the test
