@@ -1,7 +1,12 @@
 
+For more details, read this article:
+https://www.concurrencylabs.com/blog/hatch-a-swarm-of-things-using-locust-and-ec2/
+
+
 ## Load test for AWS IoT applications using Locust.io and Paho MQTT client
 
 This repo is based on code found originally <a href="https://github.com/ajm188/mqtt-locust" target="new">here</a>
+
 
 
 ### Dependencies
@@ -10,6 +15,7 @@ This repo is based on code found originally <a href="https://github.com/ajm188/m
 * Python 2.7.9 or later. The code in this repo requires support for TLSv1.2, which is available starting in Python 2.7.9
 * The code in this repo does NOT work with Python 3 due to Locust not supporting Python 3.
 * GCC (GNU Compiler Collection), required by Locust: ```sudo yum install gcc```
+* GCC C++, required  by Locust: ```sudo yum install gcc-c++```
 * Locust: ```pip install locustio```
 * OpenSSL v1.0.1 or greater (also due to TLSv1.2)
 * Paho MQTT client: ```pip install paho-mqtt```
