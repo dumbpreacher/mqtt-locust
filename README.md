@@ -8,6 +8,14 @@ https://www.concurrencylabs.com/blog/hatch-a-swarm-of-things-using-locust-and-ec
 This repo is based on code found originally <a href="https://github.com/ajm188/mqtt-locust" target="new">here</a>
 
 
+### Architecture
+
+![IoT Locust Architecture](https://www.concurrencylabs.com/img/posts/4-locust-mqtt/cloudcraftLocustAWSIoT.png)
+
+This setup creates virtual IoT devices using Locust, which publishes messages to the AWS IoT message broker.
+Once messages arrive to AWS IoT, you can configure rules that integrate with other AWS services, such as Dynamo DB, Kinesis, Lambda, S3, SNS, SQS or CloudWatch. 
+
+
 
 ### Dependencies
 
