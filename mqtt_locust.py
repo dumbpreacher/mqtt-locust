@@ -56,10 +56,10 @@ class MQTTClient(mqtt.Client):
 
     def __init__(self, *args, **kwargs):
         super(MQTTClient, self).__init__(*args, **kwargs)
-        self.on_publish = self._on_publish
-        self.on_subscribe = self._on_subscribe
-        self.on_disconnect = self._on_disconnect
-        self.on_connect = self._on_connect
+        self.on_publish = self.locust_on_publish
+        self.on_subscribe = self.locust_on_subscribe
+        self.on_disconnect = self.locust_on_disconnect
+        self.on_connect = self.locust_on_connect
         self.pubmmap = {}
         self.submmap = {}
         self.defaultQoS = 0
@@ -100,7 +100,7 @@ class MQTTClient(mqtt.Client):
                     exception=ValueError(err)
                 )
 
-          #print ("publish: err,mid:["+str(err)+","+str(mid)+"]")
+            print ("publish: err,mid:["+str(err)+","+str(mid)+"]")
           self.pubmmap[mid] = Message(
                     MESSAGE_TYPE_PUB, qos, topic, payload, start_time, timeout, name
                     )
@@ -116,7 +116,7 @@ class MQTTClient(mqtt.Client):
 
     #retry is not used at the time since this implementation only supports QoS 0
     def subscribe(self, topic, qos=0, retry=5, name='subscribe', timeout=15000):
-        print ("subscribing to topic:["+topic+"]")
+        #print ("subscribing to topic:["+topic+"]")
         start_time = time.time()
         try:
             err, mid = super(MQTTClient, self).subscribe(
@@ -140,8 +140,8 @@ class MQTTClient(mqtt.Client):
           print ("Exception when subscribing to topic:["+str(e)+"]")
         
 
-    def _on_connect(self, client, flags_dict, userdata, rc):
-        print("Connection returned result: "+mqtt.connack_string(rc))        
+    def locust_on_connect(self, client, flags_dict, userdata, rc):
+        #print("Connection returned result: "+mqtt.connack_string(rc))        
         fire_locust_success(
             request_type=REQUEST_TYPE,
             name='connect',
@@ -161,7 +161,7 @@ class MQTTClient(mqtt.Client):
     incoming data from things).
     """
         
-    def _on_publish(self, client, userdata, mid):
+    def locust_on_publish(self, client, userdata, mid):
         end_time = time.time()
         
         if self.defaultQoS == 0:
@@ -198,7 +198,7 @@ class MQTTClient(mqtt.Client):
           #print("report publish success - response_time:["+str(total_time)+"]")
 
 
-    def _on_subscribe(self, client, userdata, mid, granted_qos):
+    def locust_on_subscribe(self, client, userdata, mid, granted_qos):
         end_time = time.time()
         message = self.submmap.pop(mid, None)
         if message is None:
@@ -223,7 +223,7 @@ class MQTTClient(mqtt.Client):
             print("report subscribe success - response_time:["+str(total_time)+"]")
         
 
-    def _on_disconnect(self, client, userdata, rc):
+    def locust_on_disconnect(self, client, userdata, rc):
         fire_locust_failure(
             request_type=REQUEST_TYPE,
             name='disconnect',
