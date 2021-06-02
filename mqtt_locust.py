@@ -4,7 +4,7 @@ import sys
 import ssl
 
 import paho.mqtt.client as mqtt
-from locust import Locust, task, TaskSet, events
+from locust import User, task, TaskSet, events
 
 REQUEST_TYPE = 'MQTT'
 MESSAGE_TYPE_PUB = 'PUB'
@@ -233,12 +233,12 @@ class MQTTClient(mqtt.Client):
         self.reconnect()
 
 
-class MQTTLocust(Locust):
+class MQTTLocust(User):
 
     def __init__(self, *args, **kwargs):
-        super(Locust, self).__init__(*args, **kwargs)
-        if self.host is None:
-            raise LocustError("You must specify a host")
+        super(User, self).__init__(*args, **kwargs)
+        # if self.host is None:
+        #     raise LocustError("You must specify a host")
 
         #TODO: Current implementation sets an empty client_id when the connection is initialized,
         #      which Paho handles by creating a random client_id. 
@@ -246,13 +246,13 @@ class MQTTLocust(Locust):
         #		should match a thing_id in the AWS IoT Thing Registry
         #self.client = MQTTClient(self.client_id)
         self.client = MQTTClient()
-        try:
-            [host, port] = self.host.split(":")
-        except:
-            host, port = self.host, 8883
+        # try:
+        #     [host, port] = self.host.split(":")
+        # except:
+        host, port = "localhost", 1883
 
         try:
-          self.client.tls_set(self.ca_cert, self.iot_cert, self.iot_private_key, tls_version=ssl.PROTOCOL_TLSv1_2)
+          #self.client.tls_set(self.ca_cert, self.iot_cert, self.iot_private_key, tls_version=ssl.PROTOCOL_TLSv1_2)
           #It is important to do an asynchronous connect, given that we will have
           #multiple connections happening in a single server during a Locust test
           self.client.connect_async(host, port)

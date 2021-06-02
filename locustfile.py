@@ -1,4 +1,4 @@
-from locust import HttpLocust, TaskSet
+from locust import HttpUser, TaskSet
 
 def index(l):
     l.client.get("/")
@@ -6,12 +6,10 @@ def index(l):
 class UserBehavior(TaskSet):
     tasks = {index:1}
 
-    def on_start(self):
-        index(self)
+def on_start(self):
+    index(self)
 
-class WebsiteUser(HttpLocust):
-    task_set = UserBehavior
-    min_wait=1000
-    max_wait=2000
-    
-    
+# class WebsiteUser(HttpUser):
+#     task_set = UserBehavior
+#     min_wait=1000
+#     max_wait=2000

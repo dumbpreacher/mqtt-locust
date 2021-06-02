@@ -5,7 +5,8 @@ import ssl
 import time
 import os
 
-from locust import TaskSet, task
+from locust import task, User
+from locust.user.task import TaskSet
 
 from mqtt_locust import MQTTLocust
 
@@ -20,9 +21,9 @@ SUBSCRIBE_TIMEOUT = 10000
 class ThingBehavior(TaskSet):
     @task
     def pubqos0(self):
-        topic = os.getenv('MQTT_TOPIC','')
-        if topic == '':
-          raise ValueError("Please set environment variable MQTT_TOPIC")
+        topic = 'test-topic'
+        # if topic == '':
+        #   raise ValueError("Please set environment variable MQTT_TOPIC")
         self.client.publish(topic, payload=self.payload(), qos=0, name='publish:qos0:'+topic, timeout=PUBLISH_TIMEOUT)
 
     def on_start(self):
@@ -41,13 +42,13 @@ class ThingBehavior(TaskSet):
    Locust hatches several instances of this class, according to the number of simulated users
    that we define in the GUI. Each instance of MyThing represents a device that will connect to AWS IoT.
 """
-class MyThing(MQTTLocust):
-    ca_cert = os.getenv('CA_CERT','')
-    iot_cert = os.getenv('IOT_CERT','')
-    iot_private_key = os.getenv('IOT_PRIVATE_KEY','')
-    if ca_cert == '' or iot_cert == '' or iot_private_key == '': 
-      raise ValueError("Make sure the following environment variables are set: CA_CERT, IOT_CERT, IOT_PRIVATE_KEY")
-    task_set = ThingBehavior
-    min_wait = 1000
-    max_wait = 1500
+# class MyThing(MQTTLocust):
+#     # ca_cert = os.getenv('CA_CERT','')
+#     # iot_cert = os.getenv('IOT_CERT','')
+#     # iot_private_key = os.getenv('IOT_PRIVATE_KEY','')
+#     # if ca_cert == '' or iot_cert == '' or iot_private_key == '':
+#     #   raise ValueError("Make sure the following environment variables are set: CA_CERT, IOT_CERT, IOT_PRIVATE_KEY")
+#     tasks = [ThingBehavior]
+#     min_wait = 1000
+#     max_wait = 1500
     
